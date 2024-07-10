@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    
+    environment{
+        AWS_REGION = 'ap-south-1'
+    }
+        stage("Terraform Init"){
+            steps{
+                sh 'terraform init'
+            }
+        }
+        
+        stage("Terraform Plan"){
+            steps{
+                sh 'terraform plan'
+            }
+        }
+        stage("Terraform Apply"){
+            steps{
+                sh 'terraform apply-auto-approve'
+            }
+        }
+
+        stage("Invoke Lambda"){
+            steps{
+                script{
+                    def subnet_id = sh(script : 'terraform output -raw subnet_id', returnStdout: true).trim()
+                    def response = sh(script: "aws lambda invoke --function-name devops_lambda --payload'{\"subnet_id\":\"${subnet_id}\"}' --log-type Tail response.json", 
+
+                    returnStdout : true).trim()
+                    def logResult = sh(script :"jq -r'.LogResult' < response.json | base64 -d",returnStdout : true).trim()
+                    echo logResult
+                }
+            }
+        }
+        
+}
+
+
+
+
