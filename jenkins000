@@ -32,10 +32,14 @@ pipeline {
 
         stage("Invoke Lambda"){
             steps{
-                sh 'aws lambda inkove--function-name aws_lambda_function--log-type Tail output.txt'
-                sh 'cat output.txt'
-            }
-        }
+                script{
+                    def subnet_id = sh(script : 'terraform output -raw subnet_id', returnStdout: true).trim()
+                    def response = sh(script: "aws lambda invoke --function-name devops_lambda --payload'{\"subnet_id\":\"${subnet_id}\"}' --log-type Tail response.json", 
+
+                    returnStdout : true).trim()
+                    def logResult = sh(script : "jq -r'.LogResult' < response.json | base64 -d",returnStdout : true).trim()
+                    echo logResult
+                }
         
 }
 }
