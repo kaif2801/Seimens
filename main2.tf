@@ -66,7 +66,7 @@ resource "aws_security_group"
 }
 
 resource "aws_lambda_function" "lambda" {
-    filename = "lambda.zip"
+    filename = "lambda_function2.zip"
     
     
     function_name = "devops_lambda"
