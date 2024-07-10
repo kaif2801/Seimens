@@ -27,11 +27,8 @@ pipeline {
         stage("Invoke Lambda"){
             steps{
                 script{
-                    def subnet_id = sh(script : 'terraform output -raw
-                    subnet_id', returnStdout: true).trim()
-                    def response = sh(script: 'aws lambda invoke --function-name devops_lambda --payload
-                    '{\"subnet_id\":\"${subnet_id}\"}' --log-type Tail response.json | jq -r
-                    '.LogResult' | base64 -d",
+                    def subnet_id = sh(script : 'terraform output -raw subnet_id', returnStdout: true).trim()
+                    def response = sh(script: "aws lambda invoke --function-name devops_lambda --payload'{\"subnet_id\":\"${subnet_id}\"}' --log-type Tail response.json | jq -r'.LogResult' | base64 -d",
                     returnStdout : true).trim()
                     echo response
                 }
