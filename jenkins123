@@ -1,11 +1,5 @@
 pipeline {
     agent any
-    stages{
-        stage("Clone Repository"){
-            steps{
-                git 'https://github.com/kaif2801/Seimens.git'
-            }
-        }
             
         stage("TF Init"){
             steps{
@@ -38,7 +32,3 @@ pipeline {
         }
         
 }
-}
-
-
-
