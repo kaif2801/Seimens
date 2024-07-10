@@ -32,8 +32,7 @@ pipeline {
 
         stage("Invoke Lambda"){
             steps{
-                sh 'aws lambda inkove--function-name lambda_function2
-                --log-type Tail output.txt'
+                sh 'aws lambda inkove--function-name aws_lambda_function--log-type Tail output.txt'
                 sh 'cat output.txt'
             }
         }
