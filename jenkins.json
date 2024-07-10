@@ -1,0 +1,46 @@
+pipeline{
+    agent any
+    stages{
+        stage("TF Init"){
+            steps{
+                sh 'terraform init'
+            }
+        }
+        stage("TF Validate"){
+            steps{
+                echo "Validating Terraform Code"
+            }
+        }
+        stage("TF Plan"){
+            steps{
+                sh 'terraform plan-out=tfplan'
+            }
+        }
+        stage("TF Apply"){
+            steps{
+                sh 'terraform apply-auto-approve tfplan'
+            }
+        }
+        stage("Invoke Lambda"){
+            steps{
+                script {
+                          def lambdaResponse = sh(script : 'aws lambda invoke --- function-name my-lambda-function -- log-type Tail --cli-binary-format raw-in-base64-out /dev/stdout', returnStdout : true).trim()
+
+                          def decodedResponse = new
+                          String(Base64.getDecoder().decode(lambdaResponse.LogResult), 'UTF-8')
+                          echo "Lambda API Response : $(decodeResponse)"
+          
+                }
+            }
+        }
+    }
+
+          post{
+            always{
+              script{
+                      sh 'terraform destroy-auto-approve'
+              }
+            }
+          }
+
+}
