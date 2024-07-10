@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+    stages{
+        stage("Clone Repository"){
+            steps{
+                git 'https://github.com/kaif2801/Seimens.git'
+            }
+        }
+            
+        stage("TF Init"){
+            steps{
+                sh 'terraform init'
+            }
+        }
+        
+        stage("TF Plan"){
+            steps{
+                sh 'terraform plan'
+            }
+        }
+        stage("TF Apply"){
+            steps{
+                sh 'terraform apply-auto-approve'
+            }
+        }
+
+        stage("Invoke Lambda"){
+            steps{
+                script{
+                    def subnet_id = sh(script : 'terraform output -raw
+                    subnet_id', returnStdout: true).trim()
+                    def response = sh(script: 'aws lambda invoke --function-name devops_lambda --payload
+                    '{\"subnet_id\":\"${subnet_id}\"}' --log-type Tail response.json | jq -r
+                    '.LogResult' | base64 -d",
+                    returnStdout : true).trim()
+                    echo response
+                }
+            }
+        }
+        
+}
+}
+
+
+
+#sh 'aws lambda inkove--function-name aws_lambda_function--log-type Tail output.txt'
+                #sh 'cat output.txt'
